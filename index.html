@@ -224,7 +224,7 @@
 
   function filterByCategory() {
     const selected = document.getElementById("categorySelect").value;
-    filteredCards = selected === "All" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
+    filteredCards = selected === "Categories" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
     if (randomMode) shuffle(filteredCards);
     index = 0;
     showCard();
