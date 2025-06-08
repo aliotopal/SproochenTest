@@ -175,7 +175,7 @@
 
   function populateCategories() {
     const select = document.getElementById("categorySelect");
-    const categories = ["All", ...new Set(flashcards.map(c => c.Category).filter(Boolean))];
+    const categories = ["Categories", ...new Set(flashcards.map(c => c.Category).filter(Boolean))];
     select.innerHTML = "";
     categories.forEach(cat => {
       const opt = document.createElement("option");
