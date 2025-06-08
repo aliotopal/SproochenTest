@@ -1,11 +1,10 @@
-
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sproochentest Flashcards</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sproochentest Flashcards</title>
+<style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to bottom, #e0f7fa, #ffffff);
@@ -19,32 +18,35 @@
       width: 90%;
       max-width: 400px;
       height: 220px;
+      margin-top: -1rem;
     }
-
     .card {
       width: 100%;
       height: 100%;
       position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-
     .card-inner {
       width: 100%;
       height: 100%;
-      position: relative;
       transform-style: preserve-3d;
       transition: transform 0.6s ease-in-out;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
-
     .card.flipped .card-inner {
       transform: rotateY(180deg);
     }
-
     .card-face {
       position: absolute;
       width: 100%;
       height: 100%;
       backface-visibility: hidden;
-      border-radius: 1.5rem;
+      border-radius: 2rem;
       padding: 2rem;
       box-shadow: 0 6px 20px rgba(0,0,0,0.3);
       display: flex;
@@ -55,16 +57,13 @@
       color: #333;
       background: #fff;
     }
-
     .card-face.back {
       transform: rotateY(180deg);
       background-color: #e3f2fd;
     }
-
     .card-face.front {
       background-color: #ffffff;
     }
-
     button {
       background-color: #007bff;
       border: none;
@@ -77,11 +76,9 @@
       transition: background-color 0.2s ease;
       display: block;
     }
-
     button:hover {
       background-color: #0056b3;
     }
-
     select {
       margin-bottom: 1rem;
       font-size: 1rem;
@@ -89,66 +86,64 @@
       border-radius: 0.4rem;
       border: 1px solid #ccc;
     }
-
     .category-Gesondheet { border-color: #2196f3; }
     .category-Famill { border-color: #4caf50; }
     .category-Arbecht { border-color: #ff9800; }
     .category-Sproochentest { border-color: #9c27b0; }
-
-    body.dark {
-      background: #121212;
-      color: #e0e0e0;
+    #progress-container {
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 400px;
     }
-
-    body.dark .card-face {
-      background: #1e1e1e;
-      color: #e0e0e0;
-      border: 3px solid #444;
+    #progress-label {
+      margin-bottom: 0.5rem;
+      text-align: center;
     }
-
-    body.dark select,
-    body.dark button {
-      background-color: #333;
-      color: #fff;
-      border: 1px solid #555;
+    #progress-bar-wrapper {
+      background-color: #ccc;
+      border-radius: 1rem;
+      overflow: hidden;
     }
-  </style>
-  <link rel="manifest" href="manifest.json">
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js').then(function() {
-        console.log('Service Worker Registered');
-      });
+    #progress-bar {
+      height: 1rem;
+      width: 0%;
+      background-color: #007bff;
     }
-  </script>
+</style>
 </head>
 <body>
-
-<label style="margin: 1rem;">
-  <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()"> 🌙 Dark Mode
-</label>
-
 <h2>🇱🇺 Sproochentest Flashcards</h2>
-
-<select id="categorySelect" onchange="filterByCategory()">
-  <option value="All">All Categories</option>
-</select>
-
-<div id="card-wrapper" onclick="flipCard()">
+<div style="margin: 1rem 0; text-align: center;">
+  <label style="margin-bottom: 0.5rem; display: block;">
+    <input id="randomToggle" onchange="toggleRandomMode()" type="checkbox"/> 🔀 Random Mode
+  </label>
+  <select id="categorySelect" onchange="filterByCategory()">
+    <option value="Categories">All Categories</option>
+  </select>
+</div>
+<div style="margin: 1rem 0; text-align: center;"></div>
+<div id="card-wrapper">
   <div class="card" id="card">
-    <div class="card-inner" id="card-inner">
-      <div id="front" class="card-face front">Loading...</div>
-      <div id="back" class="card-face back">Loading...</div>
+    <div class="card-inner">
+      <div style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: 0.3;">❮</div>
+      <div style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: 0.3;">❯</div>
+      <div class="card-face front" id="front">Loading...</div>
+      <div class="card-face back" id="back">Loading...</div>
     </div>
   </div>
 </div>
-
-<div style="margin-top: 2.5rem;"><button onclick="nextCard()">Next</button></div>
-
+<div style="margin: 1rem 0; text-align: center;"></div>
+<div id="progress-container">
+  <div id="progress-label">Progress: 0 / 0</div>
+  <div style="background-color: #ccc; border-radius: 1rem; overflow: hidden;">
+    <div id="progress-bar" style="height: 1rem; width: 0%; background-color: #007bff;"></div>
+  </div>
+</div>
 <script>
   let flashcards = [];
   let filteredCards = [];
   let index = 0;
+  let randomMode = false;
 
   const categoryIcons = {
     'Gesondheet': '🩺',
@@ -190,14 +185,23 @@
     });
   }
 
+  function updateProgress() {
+    const progressLabel = document.getElementById("progress-label");
+    const progressBar = document.getElementById("progress-bar");
+    const total = filteredCards.length;
+    const current = Math.min(index + 1, total);
+    progressLabel.textContent = `Progress: ${current} / ${total}`;
+    progressBar.style.width = `${(current / total) * 100}%`;
+  }
+
   function showCard() {
+    if (filteredCards.length === 0) return;
     const card = filteredCards[index];
     const icon = categoryIcons[card.Category] || '';
     document.getElementById("front").textContent = icon + " " + card.Front;
     document.getElementById("back").textContent = icon + " " + card.Back;
-
-    const cardEl = document.getElementById("card");
-    cardEl.className = "card category-" + (card.Category || "").replace(/\s+/g, '');
+    document.getElementById("card").className = "card category-" + (card.Category || "").replace(/\s+/g, '');
+    updateProgress();
   }
 
   function flipCard() {
@@ -211,19 +215,49 @@
     showCard();
   }
 
-  function toggleDarkMode() {
-    document.body.classList.toggle('dark');
+  function prevCard() {
+    if (filteredCards.length === 0) return;
+    index = (index - 1 + filteredCards.length) % filteredCards.length;
+    document.getElementById("card").classList.remove("flipped");
+    showCard();
   }
 
   function filterByCategory() {
     const selected = document.getElementById("categorySelect").value;
     filteredCards = selected === "All" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
+    if (randomMode) shuffle(filteredCards);
     index = 0;
     showCard();
   }
 
+  function toggleRandomMode() {
+    randomMode = document.getElementById("randomToggle").checked;
+    filterByCategory();
+  }
+
+  function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+  document.getElementById("card-wrapper").addEventListener("click", function(e) {
+    const bounds = this.getBoundingClientRect();
+    const clickX = e.clientX - bounds.left;
+    const width = bounds.width;
+    const third = width / 3;
+
+    if (clickX < third) {
+      prevCard();
+    } else if (clickX > 2 * third) {
+      nextCard();
+    } else {
+      flipCard();
+    }
+  });
+
   fetchData();
 </script>
-
 </body>
 </html>
