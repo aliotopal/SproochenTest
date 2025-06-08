@@ -6,52 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sproochentest Flashcards</title>
   <style>
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(to bottom, #e0f7fa, #ffffff);
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#card {
-  background: #ffffff;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-  width: 90%;
-  max-width: 400px;
-  text-align: center;
-  font-size: 1.6rem;
-  cursor: pointer;
-  color: #333;
-  border: 3px solid #007bff;
-}
-
-button {
-  background-color: #007bff;
-  border: none;
-  color: white;
-  padding: 0.7rem 1.2rem;
-  border-radius: 0.5rem;
-  font-size: 1rem;
-  margin: 0.5rem;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-    button {
-      padding: 0.7rem 1.2rem;
-      margin: 0 0.5rem;
-      border: none;
-      border-radius: 0.5rem;
-      background-color: #007bff;
-      color: white;
-      font-size: 1rem;
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #e0f7fa, #ffffff);
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #card {
+      background: #ffffff;
+      border-radius: 1.5rem;
+      padding: 2rem;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      font-size: 1.6rem;
       cursor: pointer;
+      color: #333;
+      border: 3px solid #007bff;
+      transition: background 0.3s ease;
+    }
+    #card:hover {
+      background: #e3f2fd;
+    }
+    button {
+      background-color: #007bff;
+      border: none;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      margin: 0.5rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
     }
     button:hover {
       background-color: #0056b3;
@@ -60,8 +49,78 @@ button:hover {
       margin-bottom: 1rem;
       font-size: 1rem;
       padding: 0.5rem;
+      border-radius: 0.4rem;
+      border: 1px solid #ccc;
     }
-  </style>
+
+  .category-Gesondheet { border-color: #2196f3; }
+  .category-Famill { border-color: #4caf50; }
+  .category-Arbecht { border-color: #ff9800; }
+  .category-Sproochentest { border-color: #9c27b0; }
+
+  body.dark {
+    background: #121212;
+    color: #e0e0e0;
+  }
+
+  body.dark #card {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border-color: #444;
+  }
+
+  body.dark select,
+  body.dark button {
+    background-color: #333;
+    color: #fff;
+    border: 1px solid #555;
+  }
+
+  #card-wrapper {
+    perspective: 1000px;
+    width: 90%;
+    max-width: 400px;
+  }
+
+  #card {
+    transition: transform 0.6s;
+    transform-style: preserve-3d;
+    position: relative;
+    min-height: 150px;
+  }
+
+  .flipped {
+    transform: rotateY(180deg);
+  }
+
+  .card-face {
+    position: absolute;
+    width: 100%;
+    backface-visibility: hidden;
+    border-radius: 1.5rem;
+    padding: 2rem;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    background: #fff;
+  }
+
+  .back {
+    transform: rotateY(180deg);
+  }
+
+  body.dark .card-face {
+    background: #1e1e1e;
+    color: #e0e0e0;
+    border: 3px solid #444;
+  }
+
+.card-face.front {
+  background-color: #ffffff;
+}
+
+.card-face.back {
+  background-color: #e3f2fd;
+}
+</style>
 
   <link rel="manifest" href="manifest.json">
   <script>
@@ -75,13 +134,25 @@ button:hover {
 
 <body>
 
+<label style="margin: 1rem;">
+  <input type="checkbox" id="darkModeToggle" onchange="toggleDarkMode()"> 🌙 Dark Mode
+</label>
+
+
 <h2>🇱🇺 Sproochentest Flashcards</h2>
 
 <select id="categorySelect" onchange="filterByCategory()">
   <option value="All">All Categories</option>
 </select>
 
-<div id="card">Loading...</div>
+
+<div id="card-wrapper">
+  <div id="card">
+    <div id="front" class="card-face front">Loading...</div>
+    <div id="back" class="card-face back">Loading...</div>
+  </div>
+</div>
+
 
 <div id="buttons">
   <button onclick="nextCard()">Next</button>
@@ -128,7 +199,68 @@ button:hover {
     });
   }
 
+  
+  
+
+  const categoryIcons = {
+    'Gesondheet': '🩺',
+    'Famill': '👨‍👩‍👧',
+    'Arbecht': '💼',
+    'Sproochentest': '🇱🇺'
+  };
+
+
+function showCard() {
+  const frontEl = document.getElementById("front");
+  const backEl = document.getElementById("back");
+  const card = filteredCards[index];
+
+  if (!card) {
+    frontEl.textContent = "No cards found.";
+    backEl.textContent = "";
+    return;
+  }
+
+  const icon = categoryIcons[card.Category] || '';
+  frontEl.textContent = icon + " " + card.Front;
+  backEl.textContent = icon + " " + card.Back;
+
+  document.getElementById("card").className = "category-" + (card.Category || "").replace(/\s+/g, '');
+}
+
+function flipCard() {
+  const cardEl = document.getElementById("card");
+  cardEl.classList.toggle('flipped');
+}
+
+function nextCard() {
+  if (filteredCards.length === 0) return;
+  index = (index + 1) % filteredCards.length;
+  const cardEl = document.getElementById("card");
+  cardEl.classList.remove('flipped');
+  showingFront = true;
+  showCard();
+}
+
+function toggleDarkMode() {
+    document.body.classList.toggle('dark');
+  }
+
   function showCard() {
+    const cardEl = document.getElementById("card");
+    if (filteredCards.length === 0) {
+      cardEl.textContent = "No cards found.";
+      cardEl.className = "";
+      return;
+    }
+    const card = filteredCards[index];
+    cardEl.textContent = showingFront ? card.Front : card.Back;
+
+    // Set category-based class
+    cardEl.className = "category-" + (card.Category || "").replace(/\s+/g, '');
+  }
+
+function showCard() {
     const cardEl = document.getElementById("card");
     if (filteredCards.length === 0) {
       cardEl.textContent = "No cards found.";
@@ -158,7 +290,7 @@ button:hover {
     showCard();
   }
 
-  document.getElementById("card").addEventListener("click", flipCard);
+  document.getElementById("card-wrapper").addEventListener("click", flipCard);
   fetchData();
 </script>
 
