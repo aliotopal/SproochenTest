@@ -1,0 +1,152 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sproochentest Flashcards</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f4f4f4;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #card {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      font-size: 1.5rem;
+      cursor: pointer;
+      min-height: 150px;
+    }
+    #buttons {
+      margin-top: 1rem;
+    }
+    button {
+      padding: 0.7rem 1.2rem;
+      margin: 0 0.5rem;
+      border: none;
+      border-radius: 0.5rem;
+      background-color: #007bff;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    select {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+  </style>
+
+  <link rel="manifest" href="manifest.json">
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').then(function() {
+        console.log('Service Worker Registered');
+      });
+    }
+  </script>
+</head>
+
+<body>
+
+<h2>🇱🇺 Sproochentest Flashcards</h2>
+
+<select id="categorySelect" onchange="filterByCategory()">
+  <option value="All">All Categories</option>
+</select>
+
+<div id="card">Loading...</div>
+
+<div id="buttons">
+  <button onclick="nextCard()">Next</button>
+</div>
+
+<script>
+  let flashcards = [];
+  let filteredCards = [];
+  let index = 0;
+  let showingFront = true;
+
+  async function fetchData() {
+    const res = await fetch("https://sheets.googleapis.com/v4/spreadsheets/1QD8T3qsp2djYjXBiOcaSt71WKXvBaYAq0HRg08u3oqA/values/Sheet1?key=AIzaSyDgFZcT-kgdg3aps-p2uCMDAqxTVOHm1Ao");
+    const data = await res.json();
+
+    const headers = data.values[0];
+    const rows = data.values.slice(1);
+
+    const frontIdx = headers.findIndex(h => h.toLowerCase().includes("front"));
+    const backIdx = headers.findIndex(h => h.toLowerCase().includes("back"));
+    const catIdx = headers.findIndex(h => h.toLowerCase().includes("category"));
+
+    flashcards = rows.map(row => {
+      return {
+        Front: row[frontIdx] || "",
+        Back: row[backIdx] || "",
+        Category: row[catIdx] || ""
+      };
+    });
+
+    populateCategories();
+    filterByCategory();
+  }
+
+  function populateCategories() {
+    const categorySelect = document.getElementById("categorySelect");
+    const categories = ["All", ...new Set(flashcards.map(c => c.Category).filter(Boolean))];
+    categorySelect.innerHTML = "";
+    categories.forEach(cat => {
+      const opt = document.createElement("option");
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+  }
+
+  function showCard() {
+    const cardEl = document.getElementById("card");
+    if (filteredCards.length === 0) {
+      cardEl.textContent = "No cards found.";
+      return;
+    }
+    const card = filteredCards[index];
+    cardEl.textContent = showingFront ? card.Front : card.Back;
+  }
+
+  function flipCard() {
+    showingFront = !showingFront;
+    showCard();
+  }
+
+  function nextCard() {
+    if (filteredCards.length === 0) return;
+    index = (index + 1) % filteredCards.length;
+    showingFront = true;
+    showCard();
+  }
+
+  function filterByCategory() {
+    const selected = document.getElementById("categorySelect").value;
+    filteredCards = selected === "All" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
+    index = 0;
+    showingFront = true;
+    showCard();
+  }
+
+  document.getElementById("card").addEventListener("click", flipCard);
+  fetchData();
+</script>
+
+</body>
+</html>
