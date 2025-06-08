@@ -118,7 +118,7 @@
     <input id="randomToggle" onchange="toggleRandomMode()" type="checkbox"/> 🔀 Random Mode
   </label>
   <select id="categorySelect" onchange="filterByCategory()">
-    <option value="Categories">All Categories</option>
+    <option value="All">All Categories</option>
   </select>
 </div>
 <div style="margin: 1rem 0; text-align: center;"></div>
@@ -175,7 +175,7 @@
 
   function populateCategories() {
     const select = document.getElementById("categorySelect");
-    const categories = ["Categories", ...new Set(flashcards.map(c => c.Category).filter(Boolean))];
+    const categories = ["All", ...new Set(flashcards.map(c => c.Category).filter(Boolean))];
     select.innerHTML = "";
     categories.forEach(cat => {
       const opt = document.createElement("option");
@@ -224,7 +224,7 @@
 
   function filterByCategory() {
     const selected = document.getElementById("categorySelect").value;
-    filteredCards = selected === "Categories" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
+    filteredCards = selected === "All" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
     if (randomMode) shuffle(filteredCards);
     index = 0;
     showCard();
