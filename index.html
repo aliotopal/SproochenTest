@@ -198,8 +198,8 @@
     if (filteredCards.length === 0) return;
     const card = filteredCards[index];
     const icon = categoryIcons[card.Category] || '';
-    document.getElementById("front").textContent = icon + " " + card.Front;
-    document.getElementById("back").textContent = icon + " " + card.Back;
+	document.getElementById("front").innerHTML = icon + " " + card.Front.replace(/\\n/g, "<br>");
+	document.getElementById("back").innerHTML = icon + " " + card.Back.replace(/\\n/g, "<br>");
     document.getElementById("card").className = "card category-" + (card.Category || "").replace(/\s+/g, '');
     updateProgress();
   }
