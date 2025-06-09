@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>SproochenTest Flashcards</title>
-<style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sproochentest Flashcards</title>
+  <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to bottom, #e0f7fa, #ffffff);
@@ -17,247 +17,239 @@
       perspective: 1000px;
       width: 90%;
       max-width: 400px;
-      height: 220px;
+      height: 240px;
       margin-top: -1rem;
     }
     .card {
       width: 100%;
       height: 100%;
       position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+
     }
     .card-inner {
-      width: 100%;
-      height: 100%;
-      transform-style: preserve-3d;
-      transition: transform 0.6s ease-in-out;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform-origin: center center;      /* ← add this */
+  transition: transform 0.6s ease-in-out;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
     }
     .card.flipped .card-inner {
       transform: rotateY(180deg);
     }
     .card-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
+      position: absolute; width: 100%; height: 100%;
       backface-visibility: hidden;
-      border-radius: 2rem;
-      padding: 2rem;
+      border-radius: 2rem; padding: 2rem;
       box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-      text-align: center;
-      color: #333;
+      font-size: 1.2rem; text-align: center; color: #333;
       background: #fff;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
     }
     .card-face.back {
       transform: rotateY(180deg);
       background-color: #fff9c4;
     }
-    .card-face.front {
-      background-color: #ffffff;
+    .translate-btn {
+      position: absolute; top: 8px; right: 8px;
+      background: none; border: none;
+      font-size: 1.1rem; font-weight: bold;
+      cursor: pointer; color: #007bff; z-index: 2;
     }
-    button {
-      background-color: #007bff;
-      border: none;
-      color: white;
-      padding: 0.7rem 1.2rem;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      margin: 1.5rem auto 0;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      display: block;
+    .play-btn {
+      position: absolute; top: 8px; right: 40px;
+      background: none; border: none;
+      font-size: 1.1rem; cursor: pointer; z-index: 2;
+      color: #007bff;
     }
-    button:hover {
-      background-color: #0056b3;
+    .translation {
+      margin-top: 0.5rem; font-size: 0.9rem; color: #555;
+      display: none;
     }
     select {
-      margin-bottom: 1rem;
-      font-size: 1rem;
-      padding: 0.5rem;
-      border-radius: 0.4rem;
-      border: 1px solid #ccc;
+      margin-bottom: 1rem; font-size: 1rem; padding: 0.5rem;
+      border-radius: 0.4rem; border: 1px solid #ccc;
     }
-    .category-Gesondheet { border-color: #2196f3; }
-    .category-Famill { border-color: #4caf50; }
-    .category-Arbecht { border-color: #ff9800; }
-    .category-Sproochentest { border-color: #9c27b0; }
     #progress-container {
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 400px;
+      margin-top: 1rem; width: 100%; max-width: 400px;
     }
     #progress-label {
-      margin-bottom: 0.5rem;
-      text-align: center;
+      margin-bottom: 0.5rem; text-align: center;
     }
     #progress-bar-wrapper {
-      background-color: #ccc;
-      border-radius: 1rem;
-      overflow: hidden;
+      background-color: #ccc; border-radius: 1rem; overflow: hidden;
     }
     #progress-bar {
-      height: 1rem;
-      width: 0%;
-      background-color: #007bff;
+      height: 1rem; width: 0%; background-color: #007bff;
     }
-</style>
+  </style>
 </head>
 <body>
-<h2>🇱🇺 SproochenTest Flashcards</h2>
-<div style="margin: 1rem 0; text-align: center;">
-  <label style="margin-bottom: 0.5rem; display: block;">
-    <input id="randomToggle" onchange="toggleRandomMode()" type="checkbox"/> 🔀 Random Mode
-  </label>
-  <select id="categorySelect" onchange="filterByCategory()">
-    <option value="All">All Categories</option>
-  </select>
-</div>
+
+  <h2>🇱🇺 Sproochentest Flashcards</h2>
+  <div style="margin:0.5rem 0; text-align:center;">
+    <label style="display:block; margin-bottom:0.5rem;">
+      <input type="checkbox" id="randomToggle" onchange="toggleRandomMode()"/> 🔀 Random Mode
+    </label>
+    <select id="categorySelect" onchange="filterByCategory()">
+      <option>All Categories</option>
+    </select>
+  </div>
 <div style="margin: 1rem 0; text-align: center;"></div>
-<div id="card-wrapper">
-  <div class="card" id="card">
-    <div class="card-inner">
-      <div style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: 0.3;">❮</div>
-      <div style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 2rem; opacity: 0.3;">❯</div>
-      <div class="card-face front" id="front">Loading...</div>
-      <div class="card-face back" id="back">Loading...</div>
+  <div id="card-wrapper">
+    <div class="card" id="card">
+      <div class="card-inner">
+        <div style="position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:2rem; opacity:0.3; pointer-events:none;">❮</div>
+        <div style="position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:2rem; opacity:0.3; pointer-events:none;">❯</div>
+
+        <div class="card-face front">
+          <button class="play-btn" onclick="playAudio('front'); event.stopPropagation();">🔊</button>
+          <button class="translate-btn" onclick="toggleTranslation('front'); event.stopPropagation();">EN</button>
+          <div id="front-text">Loading…</div>
+          <div id="front-translation" class="translation"></div>
+        </div>
+
+        <div class="card-face back">
+          <button class="play-btn" onclick="playAudio('back'); event.stopPropagation();">🔊</button>
+          <button class="translate-btn" onclick="toggleTranslation('back'); event.stopPropagation();">EN</button>
+          <div id="back-text">Loading…</div>
+          <div id="back-translation" class="translation"></div>
+        </div>
+
+      </div>
     </div>
   </div>
-</div>
-<div style="margin: 1rem 0; text-align: center;"></div>
-<div id="progress-container">
-  <div id="progress-label">Progress: 0 / 0</div>
-  <div style="background-color: #ccc; border-radius: 1rem; overflow: hidden;">
-    <div id="progress-bar" style="height: 1rem; width: 0%; background-color: #007bff;"></div>
+
+  <div style="margin:1rem 0;"></div>
+
+  <div id="progress-container">
+    <div id="progress-label">Progress: 0 / 0</div>
+    <div id="progress-bar-wrapper"><div id="progress-bar"></div></div>
   </div>
-</div>
-<script>
-  let flashcards = [];
-  let filteredCards = [];
-  let index = 0;
-  let randomMode = false;
 
-  const categoryIcons = {
-    'Gesondheet': '🩺',
-    'Famill': '👨‍👩‍👧',
-    'Arbecht': '💼',
-    'Sproochentest': '🇱🇺'
-  };
+  <audio id="audio-player" crossorigin="anonymous"></audio>
 
-  async function fetchData() {
-    const res = await fetch("https://sheets.googleapis.com/v4/spreadsheets/1QD8T3qsp2djYjXBiOcaSt71WKXvBaYAq0HRg08u3oqA/values/Sheet1?key=AIzaSyDgFZcT-kgdg3aps-p2uCMDAqxTVOHm1Ao");
-    const data = await res.json();
+  <script>
+    let flashcards = [], filteredCards = [], index = 0, randomMode = false;
+    let englishFrontIdx = -1, englishBackIdx = -1;
+    let audioFrontIdx = -1, audioBackIdx = -1;
+    const categoryIcons = {
+      'Gesondheet':'🩺','Famill':'👨‍👩‍👧',
+      'Arbecht':'💼','Sproochentest':'🇱🇺'
+    };
+    const audioEl = document.getElementById('audio-player');
 
-    const headers = data.values[0];
-    const rows = data.values.slice(1);
-
-    const frontIdx = headers.findIndex(h => h.toLowerCase().includes("front"));
-    const backIdx = headers.findIndex(h => h.toLowerCase().includes("back"));
-    const catIdx = headers.findIndex(h => h.toLowerCase().includes("category"));
-
-    flashcards = rows.map(row => ({
-      Front: row[frontIdx] || "",
-      Back: row[backIdx] || "",
-      Category: row[catIdx] || ""
-    }));
-
-    populateCategories();
-    filterByCategory();
-  }
-
-  function populateCategories() {
-    const select = document.getElementById("categorySelect");
-    const categories = ["All", ...new Set(flashcards.map(c => c.Category).filter(Boolean))];
-    select.innerHTML = "";
-    categories.forEach(cat => {
-      const opt = document.createElement("option");
-      opt.value = cat;
-      opt.textContent = cat;
-      select.appendChild(opt);
+    audioEl.addEventListener('error', () => {
+      console.error('Audio error code', audioEl.error && audioEl.error.code);
+      alert('Audio error code ' + (audioEl.error && audioEl.error.code));
     });
-  }
 
-  function updateProgress() {
-    const progressLabel = document.getElementById("progress-label");
-    const progressBar = document.getElementById("progress-bar");
-    const total = filteredCards.length;
-    const current = Math.min(index + 1, total);
-    progressLabel.textContent = `Progress: ${current} / ${total}`;
-    progressBar.style.width = `${(current / total) * 100}%`;
-  }
-
-  function showCard() {
-    if (filteredCards.length === 0) return;
-    const card = filteredCards[index];
-    const icon = categoryIcons[card.Category] || '';
-	document.getElementById("front").innerHTML = icon + " " + card.Front.replace(/\\n/g, "<br>");
-	document.getElementById("back").innerHTML = icon + " " + card.Back.replace(/\\n/g, "<br>");
-    document.getElementById("card").className = "card category-" + (card.Category || "").replace(/\s+/g, '');
-    updateProgress();
-  }
-
-  function flipCard() {
-    document.getElementById("card").classList.toggle("flipped");
-  }
-
-  function nextCard() {
-    if (filteredCards.length === 0) return;
-    index = (index + 1) % filteredCards.length;
-    document.getElementById("card").classList.remove("flipped");
-    showCard();
-  }
-
-  function prevCard() {
-    if (filteredCards.length === 0) return;
-    index = (index - 1 + filteredCards.length) % filteredCards.length;
-    document.getElementById("card").classList.remove("flipped");
-    showCard();
-  }
-
-  function filterByCategory() {
-    const selected = document.getElementById("categorySelect").value;
-    filteredCards = selected === "All" ? [...flashcards] : flashcards.filter(c => c.Category === selected);
-    if (randomMode) shuffle(filteredCards);
-    index = 0;
-    showCard();
-  }
-
-  function toggleRandomMode() {
-    randomMode = document.getElementById("randomToggle").checked;
-    filterByCategory();
-  }
-
-  function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+    function wrapText(text) {
+      return text.replace(/\\n/g,'<br>').replace(/\n/g,'<br>');
     }
-  }
 
-  document.getElementById("card-wrapper").addEventListener("click", function(e) {
-    const bounds = this.getBoundingClientRect();
-    const clickX = e.clientX - bounds.left;
-    const width = bounds.width;
-    const third = width / 3;
+    async function fetchData() {
+      const url = "https://sheets.googleapis.com/v4/spreadsheets/1QD8T3qsp2djYjXBiOcaSt71WKXvBaYAq0HRg08u3oqA/values/Sheet1?key=AIzaSyDgFZcT-kgdg3aps-p2uCMDAqxTVOHm1Ao";
+      const res = await fetch(url);
+      const data = await res.json();
+      const headers = data.values[0], rows = data.values.slice(1);
 
-    if (clickX < third) {
-      prevCard();
-    } else if (clickX > 2 * third) {
-      nextCard();
-    } else {
-      flipCard();
+      const fi = headers.findIndex(h=>h.toLowerCase().includes("front")),
+            bi = headers.findIndex(h=>h.toLowerCase().includes("back")),
+            ci = headers.findIndex(h=>h.toLowerCase().includes("category"));
+      englishFrontIdx = headers.findIndex(h=>h.toLowerCase().includes("english front"));
+      englishBackIdx  = headers.findIndex(h=>h.toLowerCase().includes("english back"));
+      audioFrontIdx   = headers.findIndex(h=>h.toLowerCase().includes("audio front"));
+      audioBackIdx    = headers.findIndex(h=>h.toLowerCase().includes("audio back"));
+
+      flashcards = rows.map(r => ({
+        Front:        r[fi] || "",
+        Back:         r[bi] || "",
+        Category:     r[ci] || "",
+        EnglishFront: englishFrontIdx>=0 ? r[englishFrontIdx] : "",
+        EnglishBack:  englishBackIdx >=0 ? r[englishBackIdx]  : "",
+        AudioFront:   audioFrontIdx   >=0 ? r[audioFrontIdx]   : "",
+        AudioBack:    audioBackIdx    >=0 ? r[audioBackIdx]    : ""
+      }));
+
+      populateCategories();
+      filterByCategory();
     }
-  });
 
-  fetchData();
-</script>
+    function populateCategories() {
+      const sel = document.getElementById("categorySelect");
+      sel.innerHTML = "";
+      ["All", ...new Set(flashcards.map(c=>c.Category).filter(Boolean))].forEach(cat => {
+        const opt = document.createElement("option");
+        opt.value = opt.textContent = cat;
+        sel.appendChild(opt);
+      });
+    }
+
+    function updateProgress() {
+      const total = filteredCards.length, curr = Math.min(index+1, total);
+      document.getElementById("progress-label").textContent = `Progress: ${curr} / ${total}`;
+      document.getElementById("progress-bar").style.width = `${(curr/total)*100}%`;
+    }
+
+    function showCard() {
+      if (!filteredCards.length) return;
+      const c = filteredCards[index],
+            ic = categoryIcons[c.Category]||"";
+      document.getElementById("front-text").innerHTML = ic + " " + wrapText(c.Front);
+      document.getElementById("back-text") .innerHTML = ic + " " + wrapText(c.Back);
+      document.getElementById("front-translation").innerHTML = wrapText(c.EnglishFront);
+      document.getElementById("back-translation") .innerHTML = wrapText(c.EnglishBack);
+      document.getElementById("front-translation").style.display = "none";
+      document.getElementById("back-translation") .style.display = "none";
+      document.getElementById("card").className =
+        "card category-" + (c.Category||"").replace(/\s+/g,"");
+      updateProgress();
+    }
+
+    function flipCard() { audioEl.pause(); document.querySelector('.card').classList.toggle("flipped"); }
+    function nextCard() { if(!filteredCards.length) return; index=(index+1)%filteredCards.length; audioEl.pause(); document.querySelector('.card').classList.remove("flipped"); showCard(); }
+    function prevCard() { if(!filteredCards.length) return; index=(index-1+filteredCards.length)%filteredCards.length; audioEl.pause(); document.querySelector('.card').classList.remove("flipped"); showCard(); }
+
+    function filterByCategory(){
+      const v = document.getElementById("categorySelect").value;
+      filteredCards = v==="All" ? [...flashcards] : flashcards.filter(x=>x.Category===v);
+      if(randomMode) filteredCards.sort(()=>Math.random()-0.5);
+      index=0; showCard();
+    }
+
+    function toggleRandomMode(){ randomMode=document.getElementById("randomToggle").checked; filterByCategory(); }
+
+    function toggleTranslation(side) {
+      const el = document.getElementById(side+"-translation");
+      el.style.display = el.style.display==="none" ? "block" : "none";
+    }
+
+    function playAudio(side) {
+      const key = side==="front" ? "AudioFront" : "AudioBack";
+      const url = filteredCards[index][key];
+      if (!url) return alert("No audio URL provided.");
+      console.log("Attempting to play:", url);
+      audioEl.pause();
+      audioEl.src = url;
+      audioEl.load();
+      audioEl.play().catch(err => console.error("play() failed:", err));
+    }
+
+    document.getElementById("card-wrapper").addEventListener("click", e => {
+      const b = e.currentTarget.getBoundingClientRect(),
+            x = e.clientX - b.left, w = b.width, t = w/3;
+      if (x < t) prevCard();
+      else if (x > 2*t) nextCard();
+      else flipCard();
+    });
+
+    fetchData();
+  </script>
 </body>
 </html>
