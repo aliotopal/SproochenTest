@@ -181,7 +181,7 @@
 		  .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
 		  .replace(/[^a-z0-9]/gi, "")                       // Remove non-alphanumeric
 		  .replace(/^vum$/, "vun");                         // Special case
-		return "https://lod.lu/uploads/AAC/${cleaned}1.m4a";
+		return `https://lod.lu/uploads/AAC/${cleaned}1.m4a`;
 	  };
 
 	  // Always use lod.lu if it's a Vocabulary card
