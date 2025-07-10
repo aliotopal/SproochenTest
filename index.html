@@ -186,7 +186,7 @@
 	  };
 
 	  // Always use lod.lu if it's a Vocabulary card
-	  const isVocab = cat.toLowerCase() === "vocabulary";
+	  const isVocab = cat.trim().toLowerCase() === "vocabulary";
 
 	  return {
 		Front:        front,
