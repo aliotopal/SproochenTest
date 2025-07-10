@@ -132,7 +132,7 @@
     <div id="progress-bar-wrapper"><div id="progress-bar"></div></div>
   </div>
 
-  <audio id="audio-player" crossorigin="anonymous"></audio>
+  <audio id="audio-player"></audio>
 
   <script>
     let flashcards = [], filteredCards = [], index = 0, randomMode = false;
@@ -153,33 +153,57 @@
       return text.replace(/\\n/g,'<br>').replace(/\n/g,'<br>');
     }
 
-    async function fetchData() {
-      const url = "https://sheets.googleapis.com/v4/spreadsheets/1QD8T3qsp2djYjXBiOcaSt71WKXvBaYAq0HRg08u3oqA/values/Sheet1?key=AIzaSyDgFZcT-kgdg3aps-p2uCMDAqxTVOHm1Ao";
-      const res = await fetch(url);
-      const data = await res.json();
-      const headers = data.values[0], rows = data.values.slice(1);
 
-      const fi = headers.findIndex(h=>h.toLowerCase().includes("front")),
-            bi = headers.findIndex(h=>h.toLowerCase().includes("back")),
-            ci = headers.findIndex(h=>h.toLowerCase().includes("category"));
-      englishFrontIdx = headers.findIndex(h=>h.toLowerCase().includes("english front"));
-      englishBackIdx  = headers.findIndex(h=>h.toLowerCase().includes("english back"));
-      audioFrontIdx   = headers.findIndex(h=>h.toLowerCase().includes("audio front"));
-      audioBackIdx    = headers.findIndex(h=>h.toLowerCase().includes("audio back"));
+	
+	async function fetchData() {
+	  const url = "https://sheets.googleapis.com/v4/spreadsheets/1QD8T3qsp2djYjXBiOcaSt71WKXvBaYAq0HRg08u3oqA/values/Sheet1?key=AIzaSyDgFZcT-kgdg3aps-p2uCMDAqxTVOHm1Ao";
+	  const res = await fetch(url);
+	  const data = await res.json();
+	  const headers = data.values[0], rows = data.values.slice(1);
 
-      flashcards = rows.map(r => ({
-        Front:        r[fi] || "",
-        Back:         r[bi] || "",
-        Category:     r[ci] || "",
-        EnglishFront: englishFrontIdx>=0 ? r[englishFrontIdx] : "",
-        EnglishBack:  englishBackIdx >=0 ? r[englishBackIdx]  : "",
-        AudioFront:   audioFrontIdx   >=0 ? r[audioFrontIdx]   : "",
-        AudioBack:    audioBackIdx    >=0 ? r[audioBackIdx]    : ""
-      }));
+	  const fi = headers.findIndex(h=>h.toLowerCase().includes("front")),
+			bi = headers.findIndex(h=>h.toLowerCase().includes("back")),
+			ci = headers.findIndex(h=>h.toLowerCase().includes("category"));
+	  englishFrontIdx = headers.findIndex(h=>h.toLowerCase().includes("english front"));
+	  englishBackIdx  = headers.findIndex(h=>h.toLowerCase().includes("english back"));
+	  audioFrontIdx   = headers.findIndex(h=>h.toLowerCase().includes("audio front"));
+	  audioBackIdx    = headers.findIndex(h=>h.toLowerCase().includes("audio back"));
 
-      populateCategories();
-      filterByCategory();
-    }
+	flashcards = rows.map(r => {
+	  const cat = r[ci] || "";
+	  const front = r[fi] || "";
+	  const back  = r[bi]  || "";
+
+	  const lodUrl = (word) => {
+		if (!word) return "";
+		let cleaned = word.toLowerCase()
+		  .replace(/\(.*?\)/g, "")                          // Remove (e), (d')
+		  .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
+		  .replace(/[^a-z0-9]/gi, "")                       // Remove non-alphanumeric
+		  .replace(/^vum$/, "vun");                         // Special case
+		return `https://lod.lu/uploads/AAC/${cleaned}1.m4a`;
+	  };
+
+	  // Always use lod.lu if it's a Vocabulary card
+	  const isVocab = cat.toLowerCase() === "vocabulary";
+
+	  return {
+		Front:        front,
+		Back:         back,
+		Category:     cat,
+		EnglishFront: englishFrontIdx>=0 ? r[englishFrontIdx] : "",
+		EnglishBack:  englishBackIdx >=0 ? r[englishBackIdx]  : "",
+		AudioFront:   isVocab ? lodUrl(front) : (audioFrontIdx>=0 ? r[audioFrontIdx] : ""),
+		AudioBack:    isVocab ? lodUrl(back)  : (audioBackIdx >=0 ? r[audioBackIdx]  : "")
+	  };
+	});
+
+	  populateCategories();
+	  filterByCategory();
+	}
+
+
+
 
     function populateCategories() {
       const sel = document.getElementById("categorySelect");
